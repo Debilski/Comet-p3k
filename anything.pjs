@@ -1,0 +1,97 @@
+// @pjs preload must be used to preload the image
+/* @pjs preload="agent1_80.png, agent2_80.png, agent3_80.png, agent4_80.png"; */
+
+var stepSize = 0.1;
+
+function Position(x, y) {
+  this.x = x;
+  this.y = y;
+  this.equals = function(other) {
+    return this.x == other.x && this.y == other.y;
+  };
+  this.distance = function(other) {
+    return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
+  };
+  this.toString = function() { return "{" + this.x + "; " + this.y + "}"; };
+  this.clone = function() { return new Position(this.x, this.y); };
+}
+
+function Agent(image, initialPosition) {
+  this.image = loadImage(image);
+  this.position = initialPosition.clone();
+  this.next = initialPosition.clone();
+
+  this.needsUpdate = function() {
+    return !(this.position.equals(this.next));
+  };
+
+  this.updatePosition = function(stepSize) {
+    if (this.position == this.next) return;
+
+    var update = function(current, goal) {
+      if (Math.abs(current - goal) < stepSize) {
+        return goal;
+      } else {
+        if (current > goal) return current - stepSize;
+        else return current + stepSize;
+      }
+    }
+
+    this.position.x = update(this.position.x, this.next.x);
+    this.position.y = update(this.position.y, this.next.y);
+  };
+
+  this.setNext = function(x, y) {
+    this.next.x = x;
+    this.next.y = y;
+    loop();
+  };
+
+  this.put = function(x, y) {
+  this.position.x = x;
+  this.position.y = y;
+  this.setNext(x, y);
+  }
+}
+
+void drawAgent(agent) {
+  image(agent.image, agent.position.x * 30, agent.position.y * 30);
+}
+
+void setup() {
+  agents[0] = new Agent("agent1_80.png", new Position(0, 0));
+  agents[1] = new Agent("agent2_80.png", new Position(0, 0));
+  agents[2] = new Agent("agent3_80.png", new Position(0, 0));
+  agents[3] = new Agent("agent4_80.png", new Position(0, 0));
+
+  size(400,400);  
+  background(125);  
+  fill(255);  
+  //noLoop();
+  PFont fontA = loadFont("courier");  
+  textFont(fontA, 14);    
+} 
+
+void draw(){
+    background(125);
+    // determine center and max clock arm length  
+    var centerX = processing.width / 2, centerY = processing.height / 2;  
+    var maxArmLength = Math.min(centerX, centerY);
+  
+    for (var i=0; i<agents.length; i++) {
+        agents[i].updatePosition(stepSize);
+    }
+ 
+    for (var i=0; i<agents.length; i++) {
+      drawAgent(agents[i]);
+    }
+ 
+    // stop, if all are placed
+    var needsUpdate = false;
+    for (var i=0; i < agents.length; i++) {
+      if (agents[i].needsUpdate()) { needsUpdate = true; }
+    }
+    
+    if (! needsUpdate) noLoop();
+}
+
