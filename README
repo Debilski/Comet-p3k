@@ -1,0 +1,18 @@
+## Terminal #1:
+git clone git://github.com/Debilski/Comet-p3k.git
+cd Comet-p3k
+./sbt
+# und innerhalb des sbt-Prozesses
+update
+compile
+jetty-run
+# sbt update kann eine Weile dauern, muss aber nur einmal gemacht werden
+# Browser öffnen und http://localhost:8080/ ansehen und dann gleichzeitig
+
+
+## Terminal #2:
+curl localhost:8080/api/3/south
+curl localhost:8080/api/3/east
+curl localhost:8080/api/1/north
+# und sehen, wie sich das Browserfenster live aktualisiert.
+
