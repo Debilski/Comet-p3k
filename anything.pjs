@@ -9,6 +9,9 @@ function Position(x, y) {
   this.equals = function(other) {
     return this.x == other.x && this.y == other.y;
   };
+  this.len = function() {
+    return this.distance(new Position(0, 0));
+  }
   this.distance = function(other) {
     return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
   };
@@ -21,14 +24,48 @@ function Agent(image, initialPosition) {
   this.position = initialPosition.clone();
   this.next = initialPosition.clone();
 
+  this.up = function() {
+    this.next.y -= 1;
+    loop();
+  }
+  this.down = function() {
+    this.next.y += 1;
+    loop();
+  }
+  this.left = function() {
+    this.next.x -= 1;
+    loop();
+  }
+  this.right = function() {
+    this.next.x += 1;
+    loop();
+  }
+
+  this.angle = 0;
+
+  this.draw = function() {
+    noFill();
+    stroke(64,128,187,200);
+    strokeWeight(3);
+    ellipseMode(CENTER);
+    ellipse(this.position.x * 20 + 20, this.position.y * 20 + 20, 30, 30);
+
+        strokeWeight(3);
+    stroke(235, 100, 100);
+    arc(this.position.x * 20 + 20, this.position.y * 20 + 20, 30, 30, radians(this.angle - 30), radians(this.angle - 20));
+    arc(this.position.x * 20 + 20, this.position.y * 20 + 20, 30, 30, radians(this.angle + 20), radians(this.angle + 30));
+    stroke(235, 235, 50);
+    arc(this.position.x * 20 + 20, this.position.y * 20 + 20, 30, 30, radians(this.angle - 5), radians(this.angle + 5));
+  }
+
   this.needsUpdate = function() {
     return !(this.position.equals(this.next));
   };
 
   this.updatePosition = function(stepSize) {
-    if (this.position == this.next) return;
+    if (this.position.equals(this.next)) return;
 
-    var update = function(current, goal) {
+    var update = function(current, goal, stepSize) {
       if (Math.abs(current - goal) < stepSize) {
         return goal;
       } else {
@@ -37,8 +74,22 @@ function Agent(image, initialPosition) {
       }
     }
 
-    this.position.x = update(this.position.x, this.next.x);
-    this.position.y = update(this.position.y, this.next.y);
+    var stepX = update(this.position.x, this.next.x, stepSize);
+    var stepY = update(this.position.y, this.next.y, stepSize);
+
+    println("--");
+    println(stepX);
+    println(stepY);
+    var angle = (degrees(atan2(this.position.y - stepY, this.position.x - stepX)) + 180) % 360 ;
+    println(angle);
+
+    this.angle = update(this.angle, angle, 3);
+    if (this.angle != angle) {
+      return;
+    }
+
+    this.position.x = stepX;
+    this.position.y = stepY;
   };
 
   this.setNext = function(x, y) {
@@ -55,17 +106,19 @@ function Agent(image, initialPosition) {
 }
 
 void drawAgent(agent) {
-  image(agent.image, agent.position.x * 30, agent.position.y * 30);
+  var posx = agent.position.x * 30;
+  var posy = agent.position.y * 30;
+  agent.draw();
 }
 
 void setup() {
   agents[0] = new Agent("agent1_80.png", new Position(0, 0));
-  agents[1] = new Agent("agent2_80.png", new Position(0, 0));
+  agents[1] = new Agent("agent2_80.png", new Position(1, 0));
   agents[2] = new Agent("agent3_80.png", new Position(0, 0));
   agents[3] = new Agent("agent4_80.png", new Position(0, 0));
 
   size(400,400);  
-  background(125);  
+  background(225);  
   fill(255);  
   //noLoop();
   PFont fontA = loadFont("courier");  
@@ -73,7 +126,7 @@ void setup() {
 } 
 
 void draw(){
-    background(125);
+    background(225);
     // determine center and max clock arm length  
     var centerX = processing.width / 2, centerY = processing.height / 2;  
     var maxArmLength = Math.min(centerX, centerY);

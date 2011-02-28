@@ -19,6 +19,19 @@ var agents = Array();
     if (agents[1])
       agents[1].put(3, 3);
     }
+
+    function up(num) {
+      if (agents[num]) agents[num].up();
+    }
+    function down(num) {
+      if (agents[num]) agents[num].down();
+    }
+    function left(num) {
+      if (agents[num]) agents[num].left();
+    }
+    function right(num) {
+      if (agents[num]) agents[num].right();
+    }
 </script>  
   
 <div style="height:0px;width:0px;overflow:hidden;"></div>
@@ -27,6 +40,10 @@ var agents = Array();
 <form name="Formular" action="">
     <input type="button" value=" = " onclick="move()">
     <input type="button" value=" = " onclick="put()">
+    <input type="button" value=" = " onclick="up(2)">
+    <input type="button" value=" = " onclick="down(2)">
+    <input type="button" value=" = " onclick="left(2)">
+    <input type="button" value=" = " onclick="right(2)">
 </form>
 
 </body>
