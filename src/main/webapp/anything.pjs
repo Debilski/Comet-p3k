@@ -3,6 +3,41 @@
 
 var stepSize = 0.1;
 
+var wall = [
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 1, 1, 0, 1, 1, 0, 1],
+  [1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+  [1, 0, 1, 1, 0, 0, 1, 0, 1, 1],
+  [1, 0, 0, 0, 0, 0, 1, 0, 1, 1],
+  [1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+];
+
+function hasWall(x, y) {
+  return Boolean(wall[x][y]);
+}
+
+var gridX = wall.length;
+var gridY = wall[0].length;
+
+var scale = 40;
+
+function scaleX(x) {
+  return scale + scale * x;
+}
+
+function scaleY(y) {
+  return scale + scale * y;
+}
+
+function gridToReal(x, y) {
+  return [scaleX(x), scaleY(y)];
+}
+
 function Position(x, y) {
   this.x = x;
   this.y = y;
@@ -25,20 +60,16 @@ function Agent(image, initialPosition) {
   this.next = initialPosition.clone();
 
   this.up = function() {
-    this.next.y -= 1;
-    loop();
+    this.setNext(this.next.x, this.next.y - 1);
   }
   this.down = function() {
-    this.next.y += 1;
-    loop();
+    this.setNext(this.next.x, this.next.y + 1);
   }
   this.left = function() {
-    this.next.x -= 1;
-    loop();
+    this.setNext(this.next.x - 1, this.next.y);
   }
   this.right = function() {
-    this.next.x += 1;
-    loop();
+    this.setNext(this.next.x + 1, this.next.y);
   }
 
   this.angle = 0;
@@ -48,14 +79,19 @@ function Agent(image, initialPosition) {
     stroke(64,128,187,200);
     strokeWeight(3);
     ellipseMode(CENTER);
-    ellipse(this.position.x * 20 + 20, this.position.y * 20 + 20, 30, 30);
 
-        strokeWeight(3);
+    var x = scaleX(this.position.x);
+    var y = scaleY(this.position.y);
+
+    ellipse(x, y, 30, 30);
+
+    strokeWeight(3);
     stroke(235, 100, 100);
-    arc(this.position.x * 20 + 20, this.position.y * 20 + 20, 30, 30, radians(this.angle - 30), radians(this.angle - 20));
-    arc(this.position.x * 20 + 20, this.position.y * 20 + 20, 30, 30, radians(this.angle + 20), radians(this.angle + 30));
+
+    arc(x, y, 30, 30, radians(this.angle - 30), radians(this.angle - 20));
+    arc(x, y, 30, 30, radians(this.angle + 20), radians(this.angle + 30));
     stroke(235, 235, 50);
-    arc(this.position.x * 20 + 20, this.position.y * 20 + 20, 30, 30, radians(this.angle - 5), radians(this.angle + 5));
+    arc(x, y, 30, 30, radians(this.angle - 5), radians(this.angle + 5));
   }
 
   this.needsUpdate = function() {
@@ -89,15 +125,17 @@ function Agent(image, initialPosition) {
   };
 
   this.setNext = function(x, y) {
+    if (hasWall(x, y)) return;
     this.next.x = x;
     this.next.y = y;
     loop();
   };
 
   this.put = function(x, y) {
-  this.position.x = x;
-  this.position.y = y;
-  this.setNext(x, y);
+    if (hasWall(x, y)) return;
+    this.position.x = x;
+    this.position.y = y;
+    this.setNext(x, y);
   }
 }
 
@@ -108,12 +146,21 @@ void drawAgent(agent) {
 }
 
 void setup() {
-  agents[0] = new Agent("agent1_80.png", new Position(0, 0));
-  agents[1] = new Agent("agent2_80.png", new Position(1, 0));
-  agents[2] = new Agent("agent3_80.png", new Position(0, 0));
-  agents[3] = new Agent("agent4_80.png", new Position(0, 0));
+  var getRandomPos = function() {
+    while (1) {
+      var x = int(random(gridX));
+      var y = int(random(gridY));
+      if (!hasWall(x, y))
+        return new Position(x, y);
+    }
+  }
 
-  size(400,400);  
+  agents[0] = new Agent("agent1_80.png", getRandomPos());
+  agents[1] = new Agent("agent2_80.png", getRandomPos());
+  agents[2] = new Agent("agent3_80.png", getRandomPos());
+  agents[3] = new Agent("agent4_80.png", getRandomPos());
+
+  size(scaleX(gridX), scaleY(gridY));  
   background(225);  
   fill(255);  
   //noLoop();
@@ -121,8 +168,29 @@ void setup() {
   textFont(fontA, 14);    
 } 
 
+void drawGrid() {
+  pushStyle();
+  stroke(187,20,20);
+  fill(187,20,20);
+  strokeWeight(3);
+  ellipseMode(CENTER);
+
+  for (var i=0; i<wall.length; i++) {
+    for (var j=0; j<wall[i].length; j++) {
+      if (wall[i][j]) {
+        ellipse(scaleX(i), scaleY(j), 3, 3);
+      }
+    }
+  }
+  popStyle();
+}
+
+
 void draw(){
     background(225);
+
+    drawGrid();
+
     // determine center and max clock arm length  
     var centerX = processing.width / 2, centerY = processing.height / 2;  
     var maxArmLength = Math.min(centerX, centerY);

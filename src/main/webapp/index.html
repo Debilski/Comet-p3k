@@ -21,16 +21,6 @@
         <canvas id="canvas1" data-processing-sources="anything.pjs"></canvas>  
 
       <script type="text/javascript">  
-        function move() {
-        if (agents[1])
-        agents[1].setNext(3, 3);
-        }
-
-        function put() {
-        if (agents[1])
-        agents[1].put(3, 3);
-        }
-
         function up(num) {
         if (agents[num]) agents[num].up();
         }
@@ -49,12 +39,10 @@
 
       <div class="lift:comet?type=Pacman">      </div>
       <form name="Formular" action="">
-        <input type="button" value=" = " onclick="move()"/>
-        <input type="button" value=" = " onclick="put()" />
-        <input type="button" value=" = " onclick="up(2)" />
-        <input type="button" value=" = " onclick="down(2)" />
-        <input type="button" value=" = " onclick="left(2)" />
-        <input type="button" value=" = " onclick="right(2)" />
+        <input type="button" value=" ∧ " onclick="up(2)" />
+        <input type="button" value=" ∨ " onclick="down(2)" />
+        <input type="button" value=" &lt; " onclick="left(2)" />
+        <input type="button" value=" &gt; " onclick="right(2)" />
       </form>
 
 
