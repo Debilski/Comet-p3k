@@ -5,20 +5,24 @@ var stepSize = 0.1;
 
 var wall = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 2, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 1, 1, 0, 1, 1, 0, 1],
   [1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
   [1, 0, 1, 1, 0, 0, 1, 0, 1, 1],
-  [1, 0, 0, 0, 0, 0, 1, 0, 1, 1],
-  [1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+  [1, 2, 0, 0, 0, 0, 1, 0, 1, 1],
+  [1, 2, 0, 0, 0, 0, 1, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 2, 0, 0, 0, 1, 0, 1],
+  [1, 0, 0, 2, 0, 0, 0, 0, 0, 1],
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
 function hasWall(x, y) {
-  return Boolean(wall[x][y]);
+  return wall[x][y] == 1;
+}
+
+function hasFood(x, y) {
+  return wall[x][y] == 2;
 }
 
 var gridX = wall.length;
@@ -59,6 +63,8 @@ function Agent(image, initialPosition) {
   this.position = initialPosition.clone();
   this.next = initialPosition.clone();
 
+  this.food = 0;
+
   this.up = function() {
     this.setNext(this.next.x, this.next.y - 1);
   }
@@ -92,6 +98,10 @@ function Agent(image, initialPosition) {
     arc(x, y, 30, 30, radians(this.angle + 20), radians(this.angle + 30));
     stroke(235, 235, 50);
     arc(x, y, 30, 30, radians(this.angle - 5), radians(this.angle + 5));
+
+    textAlign(CENTER);
+    fill(0);
+    text(this.food, x, y + 4);
   }
 
   this.needsUpdate = function() {
@@ -126,6 +136,10 @@ function Agent(image, initialPosition) {
 
   this.setNext = function(x, y) {
     if (hasWall(x, y)) return;
+    if (hasFood(x, y)) {
+      this.food += 1;
+      wall[x][y] = 0;
+    }
     this.next.x = x;
     this.next.y = y;
     loop();
@@ -150,7 +164,7 @@ void setup() {
     while (1) {
       var x = int(random(gridX));
       var y = int(random(gridY));
-      if (!hasWall(x, y))
+      if (!hasWall(x, y) && !hasFood(x, y))
         return new Position(x, y);
     }
   }
@@ -177,8 +191,15 @@ void drawGrid() {
 
   for (var i=0; i<wall.length; i++) {
     for (var j=0; j<wall[i].length; j++) {
-      if (wall[i][j]) {
+      if (hasWall(i, j)) {
         ellipse(scaleX(i), scaleY(j), 3, 3);
+      }
+      if (hasFood(i, j)) {
+        pushStyle();
+        stroke(187,187,20);
+        fill(187,187,20);
+        ellipse(scaleX(i), scaleY(j), 3, 3);
+        popStyle();
       }
     }
   }
